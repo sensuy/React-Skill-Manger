@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SkillColorsEnum } from "../enums/skill-colors.enum";
 
 interface Skill {
     initials: string;
@@ -107,10 +108,38 @@ const Resources = (props: ResourcesProps) => {
         setBackGroundColor('bg-blue-500')
         
      }
+
+     const options = [
+        {
+            label: 'basic',
+            value: 'BASIC',
+            color: SkillColorsEnum.BASIC
+        },
+        {
+            label: 'intermidiate',
+            value: 'INTERMIDIATE',
+            color: SkillColorsEnum.INTERMIDIATE
+        },
+        {
+            label: 'advanced',
+            value: 'ADVANCED',
+            color: SkillColorsEnum.ADVANCED
+        },
+        {
+            label: 'intersted',
+            value: 'INTERESTED',
+            color: SkillColorsEnum.INTERESTED
+        }
+     ]
     return (
         <div className="relative group">
             <div className="absolute inset-x-0 top-[-20px] hidden group-hover:flex justify-between items-center">
                 {/* Render your buttons here, they will be shown on hover */}
+                {
+                    options.map((option, index) => (
+                        <button key={index} className={`p-1 text-white text-xs rounded shadow transition ease-in-out duration-300 ${option.color}`}>{option.label}</button>
+                    ))
+                }
                 <button className="p-1 bg-blue-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300"
                 onClick={clicked}>advanced</button>
                 <button className="p-1 bg-yellow-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300">intermidiate</button>
