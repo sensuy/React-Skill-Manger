@@ -1,70 +1,99 @@
-import { useEffect } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useDrag, useDrop } from 'react-dnd'
 import toast from 'react-hot-toast';
+import { SkillColorsEnum } from "../enums/skill-colors.enum";
+import { useMySkill } from "../context/MySkillContext";
 
-interface Task {
-    name: string;
-    id: string;
-    status: any; // Assuming these are the possible statuses
+
+interface IcreateSkill {
+
+    mySkills: any;
+    setMySkills: React.Dispatch<React.SetStateAction<any>>
 }
 
-interface IcreateTast {
-    tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<any[]>>
+interface ISection {
+    title: string;
+    color: string;
+    skills: string[];
+    setSkills: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
-const ListTask = (props: IcreateTast) => {
+export const ListSkill = () => {
 
-    const { tasks, setTasks } = props;
+    const  mySkills  = useMySkill();
 
-    const [todos, setTodos] = useState(tasks.filter((t) => t.status == 'todo'))
-    const [inProgress, setInProgress] = useState(tasks.filter((t) => t.status == 'progress'))
-    const [done, setDone] = useState(tasks.filter((t) => t.status == 'done'))
+    console.log(mySkills);
 
     useEffect(() => {
-        setTodos(tasks.filter((t) => t.status == 'todo'))
-        setInProgress(tasks.filter((t) => t.status == 'progress'))
-        setDone(tasks.filter((t) => t.status == 'done'))
-    }, [tasks])
+        setBasic(mySkills.basic)
+        setIntermediate(mySkills.intermediate)
+        setAdvanced(mySkills.advanced)
+        setInterested(mySkills.interested)
+    }, [mySkills]);
+    
 
-    const statuses = ['todo', 'progress', 'done']
+    const [basic, setBasic] = useState<any>(mySkills.basic)
+    const [intermediate, setIntermediate] = useState<any>(mySkills.intermediate)
+    const [advanced, setAdvanced] = useState<any>(mySkills.advanced)
+    const [interested, setInterested] = useState<any>(mySkills.interested)
+
+
+    useEffect(() => {
+        setBasic(mySkills.basic)
+        setIntermediate(mySkills.intermediate)
+        setAdvanced(mySkills.advanced)
+        setInterested(mySkills.interested)
+    }, [mySkills]);
+
+
+
+    const sectionsArray: ISection[] = [
+        {
+            title: 'basic',
+            color: SkillColorsEnum.BASIC,
+            skills: basic,
+            setSkills: setBasic
+        },
+        {
+            title: 'intermediate',
+            color: SkillColorsEnum.INTERMEDIATE,
+            skills: intermediate,
+            setSkills: setIntermediate
+        },
+        {
+            title: 'advanced',
+            color: SkillColorsEnum.ADVANCED,
+            skills: advanced,
+            setSkills: setAdvanced
+        },
+        {
+            title: 'intersted in',
+            color: SkillColorsEnum.INTERESTED,
+            skills: interested,
+            setSkills: setInterested
+        }
+    ]
     return (
         <div className="flex gap-16 md:gap-8 flex-wrap justify-center">
-            {statuses.map((status, index) => (
-                <Section status={status} key={index} tasks={tasks} setTasks={setTasks} todos={todos} inProgress={inProgress} done={done} />
-            ))}
+            {sectionsArray.map((section, index) => {
+                return (
+                    <Section {...section} key={index} />
+                )
+            })}
         </div>
     )
 };
 
-interface IScectionProps {
-    status: string;
-    tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<any[]>>;
-    todos: Task[];
-    inProgress: Task[];
-    done: Task[];
-}
 
-const Section = (props: IScectionProps) => {
-    const { status, tasks, setTasks, todos, inProgress, done } = props;
-    const text = status === 'todo' ? 'To Do' : status === 'progress' ? 'In Progress' : 'Done'
-    const bg = status === 'todo' ? 'bg-red-500' : status === 'progress' ? 'bg-yellow-500' : 'bg-green-500'
-    const tasksToMap = status === 'todo' ? todos : status === 'progress' ? inProgress : done
+
+
+
+const Section = (sectionProps: ISection) => {
+    const { color, title, skills, setSkills } = sectionProps;
+
     const [{ isOver }, drop] = useDrop(() => ({
-        accept: "task",
-        drop: (item: Task) => {
-            setTasks((prev) => {
-                const list = prev.map((task) => {
-                    if (task.id === item.id) {
-                        return { ...task, status }
-                    }
-                    return task
-                })
-                localStorage.setItem('tasks', JSON.stringify(list))
-                return list
-            })
+        accept: "skills",
+        drop: (item: any) => {
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver()
@@ -72,9 +101,9 @@ const Section = (props: IScectionProps) => {
     }))
     return (
         <div ref={drop} className={"w-64 rounded-md mt-2 " + (isOver ? 'bg-slate-200' : "")}>
-            <Header text={text} bg={bg} count={tasksToMap.length} />
-            {tasksToMap.map((task, index) => (
-                <Task task={task} tasks={tasks} setTasks={setTasks} key={index} />
+            <Header text={title} bg={`bg-${color}`} count={0} />
+            {skills.map((skill: any, index: number) => (
+                <Skilled skilled={skill} setSkill={setSkills} key={index} />
             ))}
         </div>
     )
@@ -99,17 +128,14 @@ const Header = (props: IHeaderProps) => {
     )
 }
 
-interface ITaskProps {
-    task: Task;
-    tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<any[]>>;
-}
 
-function Task(props: ITaskProps) {
-    const { task, tasks, setTasks } = props;
+function Skilled(props: any) {
+    const { skilled, setSkill } = props;
+
+    
     const [{ isDragging }, drag] = useDrag(() => ({
         type: "task",
-        item: { id: task.id },
+        item: { id: skilled },
         collect: (monitor) => ({
             isDragging: !!monitor.isDragging()
         })
@@ -118,10 +144,10 @@ function Task(props: ITaskProps) {
         <div ref={drag} className={
             `relative flex items-center bg-zinc-200 p-4 mt-8 shadow-md rounded-lg cursor-grab ${isDragging ? 'opacity-50' : 'opacity-100'}`
         }>
-            <p className="text-sm">{task.name}</p>
+            <p className="text-sm">{skilled}</p>
             <i className="fas fa-trash ml-auto text-red-500 cursor-pointer" onClick={() => {
-                setTasks((prev) => {
-                    const list = prev.filter((t) => t.id !== task.id)
+                setSkill((prev: any) => {
+                    const list = prev.filter((t: any) => t !== skilled)
                     localStorage.setItem('tasks', JSON.stringify(list))
                     toast('Task deleted successfully', { icon: <i className="fa-solid fa-bomb text-red-900 font-bold" />, className: "font-bold" })
                     return list
@@ -130,5 +156,3 @@ function Task(props: ITaskProps) {
         </div>
     )
 }
-
-export default ListTask;

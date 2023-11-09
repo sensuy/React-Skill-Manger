@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SkillColorsEnum } from "../enums/skill-colors.enum";
+import { useMySkillUpdate } from "../context/MySkillContext";
 
 interface Skill {
     initials: string;
@@ -80,7 +81,7 @@ interface IHeaderProps {
 }
 
 const Header = (props: IHeaderProps) => {
-    const { text, bg, count } = props;
+    const { text, count } = props;
 
     return (
         <div className={`bg-gray-700 flex items-center h-12 pl-4 rounded-md uppercase text-sm text-white`}>
@@ -100,25 +101,28 @@ interface ResourcesProps {
 
 
 const Resources = (props: ResourcesProps) => {
+    
 
-    const [backGroundColor, setBackGroundColor] = useState('bg-zinc-200')
+    const [backGroundColor, setBackGroundColor] = useState('zinc-200');
 
-    const clicked = () => { 
-        console.log('Ahaa');
-        setBackGroundColor('bg-blue-500')
-        
-     }
+    const updateMySkills: any = useMySkillUpdate();
 
-     const options = [
+    const skilled = (skill: any, option: any) => {
+        skill.value = option;
+        updateMySkills(skill)
+        setBackGroundColor(skill.color)
+    }
+
+    const options = [
         {
             label: 'basic',
             value: 'BASIC',
             color: SkillColorsEnum.BASIC
         },
         {
-            label: 'intermidiate',
+            label: 'intermediate',
             value: 'INTERMIDIATE',
-            color: SkillColorsEnum.INTERMIDIATE
+            color: SkillColorsEnum.INTERMEDIATE
         },
         {
             label: 'advanced',
@@ -126,34 +130,25 @@ const Resources = (props: ResourcesProps) => {
             color: SkillColorsEnum.ADVANCED
         },
         {
-            label: 'intersted',
+            label: 'interested',
             value: 'INTERESTED',
             color: SkillColorsEnum.INTERESTED
         }
-     ]
+    ]
     return (
         <div className="relative group">
             <div className="absolute inset-x-0 top-[-20px] hidden group-hover:flex justify-between items-center">
-                {/* Render your buttons here, they will be shown on hover */}
                 {
                     options.map((option, index) => (
-                        <button key={index} className={`p-1 text-white text-xs rounded shadow transition ease-in-out duration-300 ${option.color}`}>{option.label}</button>
-                    ))
+                        <button key={index} className={`p-1 bg-${option.color} text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300`}
+                            onClick={() => skilled(option, props.skill)}>{option.label}</button>))
                 }
-                <button className="p-1 bg-blue-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300"
-                onClick={clicked}>advanced</button>
-                <button className="p-1 bg-yellow-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300">intermidiate</button>
-                <button className="p-1 bg-red-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300">basic</button>
-                <button className="p-1 bg-purple-500 text-white text-xs rounded shadow opacity-0 group-hover:opacity-100 transition ease-in-out duration-300">intersted</button>
+
             </div>
 
-            <div className={
-                `relative flex items-center ${backGroundColor} p-4 mt-8 shadow-md rounded-lg cursor-pointer hover:bg-zinc-300`
-            }>
+            <div className={`relative flex items-center bg-${backGroundColor} p-4 mt-8 shadow-md rounded-lg cursor-pointer hover:bg-zinc-300`}>
                 <p className="text-sm">{props.skill}</p>
-                <i className="fas fa-trash ml-auto text-red-500 cursor-pointer" onClick={() => {
 
-                }}></i>
             </div>
         </div>
     )
